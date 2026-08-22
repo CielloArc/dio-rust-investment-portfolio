@@ -1,4 +1,4 @@
-# 📈 Carteira de Investimentos Fullstack em Rust
+# Carteira de Investimentos Fullstack em Rust
 
 Uma aplicação web completa e performática para gestão de carteira de investimentos, construída em **Rust** utilizando **Axum**, **SQLx (PostgreSQL)**, **Askama (SSR)** e integração em tempo real com a API do **Yahoo Finance**.
 
@@ -6,62 +6,25 @@ Uma aplicação web completa e performática para gestão de carteira de investi
 
 ---
 
-# Mapeamento Geral da Aplicação
-
-## Arquitetura do Projeto
-
-A aplicação é uma API/Aplicação Web Server-Side Rendered (SSR) construída em Rust, utilizando uma arquitetura modular por camadas:
-
-* Apresentação / Roteamento (`src/routes/` & `templates/`): Utiliza Axum para manipular requisições HTTP e Askama para renderizar templates HTML direto no backend.
-* Camada de Aplicação / Regra de Negócio (`src/app.rs`, `src/auth/`): Gerencia o estado da aplicação (AppState), autenticação JWT com cookies e permissões de acesso (Usuário vs. Admin).
-* Integração Externa (`fetch_unit_value_in_usd`): Consulta a API pública do Yahoo Finance utilizando Reqwest para obter a cotação atualizada de ativos em tempo real em USD
-* Persistência de Dados (`src/repository/`): Interage com o banco PostgreSQL através do SQLx, utilizando operações assíncronas e tipagem forte.
-
-## Arquivos Mais Importantes
-
-| Arquivo / Diretório     | Responsabilidade Principal                                                                                                                      |
-| :---------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Cargo.toml`**        | Declaração de dependências (`axum`, `sqlx`, `reqwest`, `askama`, `jwt-simple`, `rust_decimal`, etc.).                                           |
-| **`src/main.rs`**       | Ponto de entrada. Carrega variáveis de ambiente (`.env`), inicializa o pool do PostgreSQL (`AppState`) e inicia o servidor Axum.                |
-| **`src/routes/api.rs`** | Endpoints da API REST e formulários (`/assets`, `/purchases/create`, `/purchases/{id}/delete`). Contém a integração com a API do Yahoo Finance. |
-| **`src/routes/web.rs`** | Handlers das páginas renderizadas no servidor (Dashboard, Login, Telas de Ativos) via Askama.                                                   |
-| **`src/repository/`**   | Camada DAO/Acesso ao banco de dados. Contém os métodos SQL assíncronos (`list_assets`, `insert_owned_asset`, `delete_purchase`, etc.).          |
-| **`src/auth/`**         | Extração, geração e validação de tokens JWT via cookies assinados para controle de acesso (User vs. Admin).                                     |
-| **`templates/`**        | Arquivos HTML/Askama que compõem a interface do usuário (com Tailwind CSS e gráficos Chart.js).                                                 |
-
-# Fluxo Principal da Aplicação
-
-1. **Autenticação:** O usuário acessa a plataforma e faz login. A aplicação gera um JWT assinado e o injeta num cookie seguro.
-2. **Navegação e Leitura:** Ao acessar `/assets`, o handler recupera os ativos e compras do usuário via `Repository`, calcula o portfólio e renderiza a tela com o gráfico de distribuição de ativos.
-3. **Adição de Ativo/Compra:**
-   * O usuário submete o formulário de compra informando o ticker (ex: `BTC`, `EUR`, `GLD`) e a quantidade.
-   * O backend intercepta e executa uma chamada HTTP para o Yahoo Finance (`fetch_unit_value_in_usd`).
-   * O preço atualizado em USD é obtido, normalizado como Decimal e salvo no banco de dados (`owned_assets` / `assets`).
-4. **Recálculo & Feedback:** A tela é redirecionada e atualizada instantaneamente com as cotações em tempo real e a nova composição da carteira.
-
----
-
-## 🚀 Principais Melhorias Implementadas
+## Principais Melhorias Implementadas
 
 Em relação à versão original do projeto, foram introduzidas as seguintes evoluções técnicas:
 
 1. **Cotação Automática via Yahoo Finance:**
-   - Integração assíncrona utilizando `reqwest` com suporte a TLS seguro (`rustls-tls`).
-   - Normalização automática de ativos para a moeda base em **USD** (`EURUSD=X`, `BRLUSD=X`, `BTC-USD`, `ETH-USD`, `GLD`, etc.).
+   - Integração assíncrona utilizando `reqwest` com suporte a TLS seguro (`rustls-tls`).   
    
-2. **Registro Dinâmico sem Entrada Manual de Preço:**
-   - O preço unitário dos ativos não precisa mais ser inserido manualmente pelo usuário. Ao cadastrar um ativo ou realizar uma compra, o sistema consulta a API e armazena a cotação real atualizada.
+2. **Normalização automática de ativos para a moeda base em USD:**
+	- `EURUSD=X`, `BRLUSD=X`, `BTC-USD`, `ETH-USD`, `GLD`, etc.
 
-3. **Resolução de Conflitos de Linkage & Compilação Rust:**
-   - Resolução de empréstimo e tempo de vida de variáveis no compilador Rust (`Error E0716`).
-   - Ajuste das dependências do `reqwest` (`default-features = false` + `rustls-tls`) para evitar colisões entre o OpenSSL nativo e a biblioteca C `boring-sys` utilizada pela dependência `jwt-simple`.
+3. **Registro Dinâmico sem Entrada Manual de Preço:**
+   - O preço unitário dos ativos não precisa mais ser inserido manualmente pelo usuário. Ao cadastrar um ativo ou realizar uma compra, o sistema consulta a API e armazena a cotação real atualizada.
 
 4. **Módulo de Exclusão de Aportes/Compras:**
    - Adição de endpoint para deletar registros em `owned_assets` de forma segura com validação por usuário autenticado.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 - **Linguagem:** Rust (Edition 2024)
 - **Framework Web:** [Axum v0.8](https://github.com/tokio-rs/axum)
@@ -74,7 +37,7 @@ Em relação à versão original do projeto, foram introduzidas as seguintes evo
 
 ---
 
-## 🏗️ Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
 investment-portfolio/
@@ -104,11 +67,6 @@ investment-portfolio/
 ```
 
 1. Clonar o repositório
-
-```text
-git clone [https://github.com/rafaelribeiro-s/investment-portfolio.git](https://github.com/SEU_USUARIO/investment-portfolio.git)
-cd investment-portfolio
-```
 2. Configurar Variáveis de Ambiente
 
 Crie um arquivo .env na raiz do projeto com o seguinte conteúdo:
