@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Assets</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="text-slate-800 min-h-screen" style="background-color: #CCDCE6; font-family: 'Roboto', sans-serif;">
+
+    <!-- Main Container -->
+    <div class="max-w-2xl mx-auto py-10 px-6">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+
+            <h1 class="text-2xl font-semibold tracking-tight text-slate-900">
+                assets
+            </h1>
+
+            <span class="text-sm text-slate-600">
+                welcome, {{ user.username() }}
+            </span>
+
+        </div>
+
+
+        <!-- Portfolio Dashboard (Donut Chart & Legend) -->
+        <div
+            class="mb-8 bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+
+            <!-- Donut Chart -->
+            <div class="relative flex items-center justify-center shrink-0">
+                {% if self.is_total_value_positive() %}
+                <!-- External Circle (Conic Gradient) -->
+                <div class="w-40 h-40 rounded-full border border-slate-300 flex items-center justify-center shadow-sm"
+                    style="background: {{ self.conic_gradient() }};">
+
+                    <!-- Inner Hole (Matches body background #CCDCE6) -->
+                    <div
+                        class="w-28 h-28 rounded-full flex flex-col items-center justify-center border border-slate-300/50 text-center p-2" style="background-color: #CCDCE6;">
+                        <span class="text-[10px] uppercase text-slate-500 tracking-wider">total</span>
+                        <span class="text-base font-bold text-slate-900">$ {{ total_value }}</span>
+                        {% if self.is_total_delta_positive() %}
+                        <span class="text-[10px] text-emerald-600 font-medium">+{{ total_delta }}</span>
+                        {% else %}
+                        <span class="text-[10px] text-rose-600 font-medium">{{ total_delta }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div
+                    class="w-40 h-40 rounded-full border border-dashed border-slate-400 flex items-center justify-center text-slate-500 text-xs">
+                    no assets
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Asset Legend List -->
+            <div class="w-full flex flex-col justify-center gap-2">
+                {% for share in distribution %}
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/50 border border-white/60 shadow-xs">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-2.5 h-2.5 rounded-full inline-block"
+                            style="background-color: {{ share.color }};"></span>
+                        <span class="text-xs font-medium text-slate-700">{{ share.name }}</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-900">{{ share.percentage }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+
+        <!-- Assets Section -->
+        <div class="space-y-1">
+
+            <!-- Table Header -->
+            <div
+                class="grid grid-cols-12 gap-4 border-b border-slate-400/40 pb-3 mb-4 text-xs text-slate-500 uppercase tracking-wider">
+
+                <div class="col-span-4">
+                    name
+                </div>
+
+                <div class="col-span-2 text-right">
+                    quantity
+                </div>
+
+                <div class="col-span-3 text-right">
+                    unit value
+                </div>
+
+                <div class="col-span-3 text-right">
+                    change
+                </div>
+
+            </div>
+
+
+            <!-- Assets List -->
+            <div class="bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl overflow-hidden shadow-sm">
+
+                {% for asset in owned_assets %}
+
+                <!-- Asset Row -->
+                <div class="grid grid-cols-12 gap-4 p-4 border-b border-slate-300/40 text-sm cursor-pointer hover:bg-white/50 transition-colors duration-200"
+                    onclick="document.getElementById('history-{{ loop.index }}').classList.toggle('hidden')">
+
+                    <!-- Name -->
+                    <div class="col-span-4 font-medium text-slate-900">
+                        {{ asset.name }}
+                    </div>
+
+
+                    <!-- Quantity -->
+                    <div class="col-span-2 text-right text-slate-700">
+                        {{ asset.quantity_owned }}
+                    </div>
+
+
+                    <!-- Unit Value -->
+                    <div class="col-span-3 text-right text-slate-700">
+                        $ {{ asset.unit_value }}
+                    </div>
+
+
+                    <!-- Change -->
+                    {% if Self::is_positive(&asset.value_delta) %}
+
+                    <div class="col-span-3 text-right text-emerald-600 font-medium">
+                        +{{ asset.value_delta }}
+                    </div>
+
+                    {% else %}
+
+                    <div class="col-span-3 text-right text-rose-600 font-medium">
+                        {{ asset.value_delta }}
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Purchase History -->
+                <div id="history-{{ loop.index }}" class="bg-slate-50/50 hidden">
+
+                    <!-- History Header -->
+                    <div class="grid grid-cols-12 gap-4 p-2 px-4 border-b border-slate-200 text-xs text-slate-400">
+
+                        <div class="col-span-4">
+                            purchase date
+                        </div>
+
+                        <div class="col-span-2 text-right">
+                            quantity
+                        </div>
+
+                        <div class="col-span-3 text-right">
+                            bought for
+                        </div>
+
+                        <div class="col-span-3 text-right">
+                            change
+                        </div>
+
+                    </div>
+
+
+                    <!-- Purchases List -->
+                    {% for purchase in asset.purchase_history.0 %}
+                    <div
+                        class="grid grid-cols-12 gap-4 p-2 px-4 border-b border-slate-200 last:border-b-0 text-xs text-slate-600 items-center">
+
+                        <div class="col-span-3">
+                            {{ purchase.bought_at | human_datetime }}
+                        </div>
+
+                        <div class="col-span-2 text-right">
+                            {{ purchase.quantity_bought }}
+                        </div>
+
+                        <div class="col-span-3 text-right">
+                            $ {{ purchase.bought_for }}
+                        </div>
+
+                        {% if Self::is_positive(&purchase.value_delta) %}
+                        <div class="col-span-3 text-right text-emerald-600">
+                            +{{ purchase.value_delta }}
+                        </div>
+                        {% else %}
+                        <div class="col-span-3 text-right text-rose-600">
+                            {{ purchase.value_delta }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Botão de Deletar / Vender -->
+                        <div class="col-span-1 text-right">
+                            <form method="POST" action="/api/purchases/{{ purchase.id }}/delete"
+                                onsubmit="return confirm('Remove this purchase?');">
+                                <button type="submit"
+                                    class="text-rose-500 hover:text-rose-700 text-xs px-1 hover:bg-rose-500/10 rounded transition-colors">
+                                    ✕
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Action Buttons -->
+        <div class="mt-8 flex gap-4">
+
+            <!-- Register Purchase -->
+            <button type="button" onclick="document.getElementById('purchaseDialog').showModal()"
+                class="px-5 py-2.5 bg-white/60 border border-slate-300 rounded-xl text-slate-700 text-sm font-medium hover:bg-white hover:shadow-sm active:bg-slate-100 transition-all duration-300">
+                register purchase
+            </button>
+
+            <!-- Create Asset -->
+            <button type="button" onclick="document.getElementById('createAssetDialog').showModal()"
+                class="px-5 py-2.5 bg-white/60 border border-slate-300 rounded-xl text-slate-700 text-sm font-medium hover:bg-white hover:shadow-sm active:bg-slate-100 transition-all duration-300">
+                + new asset
+            </button>
+
+            <!-- Logout -->
+            <a href="/logout"
+                class="px-5 py-2.5 bg-white/40 border border-slate-300 rounded-xl text-slate-600 text-sm hover:bg-white/60 hover:text-slate-900 transition-all duration-300 inline-block">
+                logout
+            </a>
+
+        </div>
+
+
+        <!-- Purchase Dialog (Modal) -->
+        <dialog id="purchaseDialog"
+            class="bg-white/90 backdrop-blur-xl border border-slate-300 rounded-2xl p-8 w-full max-w-sm shadow-xl backdrop:bg-slate-900/40 text-slate-800">
+
+            <!-- Dialog Title -->
+            <h2 class="text-lg font-semibold text-slate-900 mb-6">
+                register purchase
+            </h2>
+
+            <!-- Purchase Form -->
+            <form method="POST" action="/api/purchases/create" class="space-y-4">
+
+                <!-- Asset -->
+                <div>
+                    <label for="assetId" class="block text-xs text-slate-500 mb-1.5">
+                        asset
+                    </label>
+
+                    <select id="assetId" name="asset_id" required
+                        class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-cyan-600 transition-all">
+
+                        <option value="" disabled selected class="text-slate-400">
+                            select an asset
+                        </option>
+
+                        {% for asset in available_assets %}
+                        <option value="{{ asset.id }}" class="text-slate-800">
+                            {{ asset.name }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Quantity -->
+                <div>
+                    <label for="quantity" class="block text-xs text-slate-500 mb-1.5">
+                        quantity
+                    </label>
+
+                    <input type="number" id="quantity" name="quantity" step="any" placeholder="0.00" required
+                        class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-cyan-600 transition-all">
+                </div>
+
+                <!-- Dialog Buttons -->
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('purchaseDialog').close()"
+                        class="px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 text-sm hover:bg-slate-200 hover:text-slate-900 transition-all duration-300">
+                        cancel
+                    </button>
+
+                    <button type="submit"
+                        class="px-4 py-2.5 bg-cyan-600/10 border border-cyan-600/30 rounded-xl text-cyan-700 text-sm font-medium hover:bg-cyan-600/20 transition-all duration-300">
+                        submit
+                    </button>
+                </div>
+
+            </form>
+        </dialog>
+
+
+        <!-- Create Asset Dialog (Modal) -->
+        <dialog id="createAssetDialog"
+            class="bg-white/90 backdrop-blur-xl border border-slate-300 rounded-2xl p-8 w-full max-w-sm shadow-xl backdrop:bg-slate-900/40 text-slate-800">
+
+            <h2 class="text-lg font-semibold text-slate-900 mb-6">
+                create new asset
+            </h2>
+
+            <form method="POST" action="/api/assets/create" class="space-y-4">
+
+                <!-- Asset Selection / Name -->
+                <div>
+                    <label for="assetName" class="block text-xs text-slate-500 mb-1.5">
+                        asset ticker
+                    </label>
+                    <select id="assetName" name="name" required
+                        class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-emerald-600 transition-all">
+                        <option value="" disabled selected class="text-slate-400">select asset</option>
+                        <option value="BRL" class="text-slate-800">BRL - Brazilian Real</option>
+                        <option value="USD" class="text-slate-800">USD - American Dollar</option>
+                        <option value="EUR" class="text-slate-800">EUR - Euro</option>
+                        <option value="BTC" class="text-slate-800">BTC - Bitcoin</option>
+                        <option value="ETH" class="text-slate-800">ETH - Ethereum</option>
+                        <option value="GLD" class="text-slate-800">GLD - Gold</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="document.getElementById('createAssetDialog').close()"
+                        class="px-4 py-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 text-sm hover:bg-slate-200 hover:text-slate-900 transition-all duration-300">
+                        cancel
+                    </button>
+
+                    <button type="submit"
+                        class="px-4 py-2.5 bg-emerald-600/10 border border-emerald-600/30 rounded-xl text-emerald-700 text-sm font-medium hover:bg-emerald-600/20 transition-all duration-300">
+                        save asset
+                    </button>
+                </div>
+
+            </form>
+        </dialog>
+
+    </div>
+
+</body>
+</html>
